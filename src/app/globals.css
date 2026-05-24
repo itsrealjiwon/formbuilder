@@ -1,26 +1,244 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --crt-green: #00FF41;
+  --crt-green-dim: #00cc33;
+  --crt-green-dark: #009926;
+  --crt-amber: #FFB000;
+  --crt-cyan: #00FFFF;
+  --crt-red: #FF3333;
+  --bg: #0A0A0A;
+  --bg-light: #111111;
+  --bg-panel: #0D1A0D;
+  --border: #1A331A;
+  --text: #00FF41;
+  --text-dim: #009926;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 16px;
 }
+
+/* CRT Scanline Effect */
+.crt-overlay {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 65, 0.03) 0px,
+    rgba(0, 255, 65, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.crt-glow {
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5), 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.crt-glow-intense {
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.8), 0 0 16px rgba(0, 255, 65, 0.4), 0 0 32px rgba(0, 255, 65, 0.2);
+}
+
+.crt-box {
+  border: 1px solid var(--border);
+  box-shadow: 0 0 4px rgba(0, 255, 65, 0.1), inset 0 0 4px rgba(0, 255, 65, 0.05);
+}
+
+.crt-box-amber {
+  border: 1px solid rgba(255, 176, 0, 0.3);
+  box-shadow: 0 0 4px rgba(255, 176, 0, 0.1);
+}
+
+.crt-box-cyan {
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.1);
+}
+
+/* Draggable Components */
+.drag-item {
+  cursor: grab;
+  border: 1px dashed var(--border);
+  padding: 8px 12px;
+  background: var(--bg);
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.drag-item:hover {
+  border-color: var(--crt-green);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+.drag-item:active {
+  cursor: grabbing;
+  border-color: var(--crt-amber);
+  background: rgba(255, 176, 0, 0.05);
+}
+
+.drag-item.dragging {
+  opacity: 0.5;
+  border-color: var(--crt-amber);
+}
+
+/* Drop Zone */
+.drop-zone {
+  min-height: 80px;
+  border: 2px dashed var(--border);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.drop-zone.drag-over {
+  border-color: var(--crt-green);
+  background: rgba(0, 255, 65, 0.05);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.1);
+}
+
+.drop-zone.has-items {
+  border-style: solid;
+  border-color: var(--border);
+}
+
+/* Form Field Items on Canvas */
+.field-item {
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--bg-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.field-item:hover {
+  border-color: var(--crt-green-dim);
+}
+
+.field-item.selected {
+  border-color: var(--crt-amber);
+  box-shadow: 0 0 8px rgba(255, 176, 0, 0.2);
+}
+
+.field-item .field-label {
+  color: var(--crt-cyan);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.field-item input,
+.field-item textarea,
+.field-item select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* CRT Input */
+.crt-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.crt-input:focus {
+  border-color: var(--crt-green);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.15);
+}
+
+/* Blinking Cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+  color: var(--crt-green);
+}
+
+/* Flicker Effect */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.97; }
+  15% { opacity: 0.94; }
+  20% { opacity: 0.98; }
+  100% { opacity: 0.97; }
+}
+
+.crt-flicker {
+  animation: flicker 4s infinite;
+}
+
+/* Status Bar */
+.status-bar {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  padding: 4px 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* Tab */
+.crt-tab {
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+
+.crt-tab.active {
+  border-color: var(--border);
+  color: var(--crt-green);
+  background: var(--bg);
+  border-bottom-color: var(--bg);
+}
+
+.crt-tab:hover:not(.active) {
+  color: var(--crt-green-dim);
+}
+
+/* JSON Preview */
+.json-preview {
+  background: #050505;
+  border: 1px solid var(--border);
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: auto;
+  max-height: 400px;
+  white-space: pre-wrap;
+  color: var(--text-dim);
+}
+
+.json-key { color: var(--crt-cyan); }
+.json-string { color: var(--crt-amber); }
+.json-number { color: var(--crt-red); }
+.json-bool { color: #FF66FF; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--crt-green-dark); }
