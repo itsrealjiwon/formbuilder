@@ -18,7 +18,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
+  font-family: var(--font-vt323), var(--font-share-tech-mono), 'Courier New', monospace;
   font-size: 16px;
 }
 

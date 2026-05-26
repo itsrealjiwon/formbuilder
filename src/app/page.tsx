@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { useState, useRef, DragEvent } from "react";
 
 interface FormField {
   id: string;
@@ -24,6 +24,17 @@ const FIELD_TYPES = [
   { type: "file", label: "File Upload", icon: "> file" },
 ];
 
+const SAMPLE_FORM: Omit<FormField, "id">[] = [
+  { type: "text", label: "Full Name", placeholder: "Enter your full name", required: true, options: [] },
+  { type: "email", label: "Email Address", placeholder: "Enter your email", required: true, options: [] },
+  { type: "select", label: "How did you hear about us?", placeholder: "Select an option", required: false, options: ["Social Media", "Friend", "Search Engine", "Advertisement"] },
+  { type: "radio", label: "Overall Satisfaction", placeholder: "", required: false, options: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied"] },
+  { type: "textarea", label: "What did you like most?", placeholder: "Tell us what you enjoyed...", required: false, options: [] },
+  { type: "checkbox", label: "Would you recommend us?", placeholder: "", required: false, options: ["Yes"] },
+  { type: "number", label: "Rate us 1-10", placeholder: "Enter a rating from 1 to 10", required: false, options: [] },
+  { type: "textarea", label: "Additional Comments", placeholder: "Any other feedback...", required: false, options: [] },
+];
+
 export default function Home() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -34,12 +45,13 @@ export default function Home() {
   const [previewValues, setPreviewValues] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const nextFieldId = useRef(1);
 
   const selectedField = fields.find((f) => f.id === selectedId);
 
   const addField = (type: string) => {
     const newField: FormField = {
-      id: `field-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `field-${nextFieldId.current++}`,
       type,
       label: `${FIELD_TYPES.find((t) => t.type === type)?.label || type}`,
       placeholder: `Enter ${type}...`,
@@ -120,6 +132,18 @@ export default function Home() {
 
   const copyJson = () => {
     navigator.clipboard.writeText(generateJson());
+  };
+
+  const handleExample = () => {
+    const startId = nextFieldId.current;
+    const exampleFields: FormField[] = SAMPLE_FORM.map((f, i) => ({
+      ...f,
+      id: `field-${startId + i}`,
+    }));
+    nextFieldId.current = startId + SAMPLE_FORM.length;
+    setFields(exampleFields);
+    setFormTitle("Customer Feedback Survey");
+    setSelectedId(null);
   };
 
   const exportJson = () => {
@@ -230,7 +254,7 @@ export default function Home() {
         {/* Left Panel — Component Palette */}
         <aside className="w-56 border-r border-[var(--border)] bg-[var(--bg-panel)] p-3 flex flex-col overflow-y-auto">
           <div className="mb-4">
-            <h2 className="text-sm text-[var(--crt-amber)] mb-2 tracking-wider">// FORM TITLE</h2>
+            <h2 className="text-sm text-[var(--crt-amber)] mb-2 tracking-wider">{"//"} FORM TITLE</h2>
             <input
               type="text"
               value={formTitle}
@@ -239,7 +263,7 @@ export default function Home() {
             />
           </div>
 
-          <h2 className="text-sm text-[var(--crt-amber)] mb-2 tracking-wider">// COMPONENTS</h2>
+          <h2 className="text-sm text-[var(--crt-amber)] mb-2 tracking-wider">{"//"} COMPONENTS</h2>
           <p className="text-[11px] text-[var(--text-dim)] mb-3">Drag to canvas or click to add</p>
           <div className="space-y-1.5">
             {FIELD_TYPES.map((ft) => (
@@ -268,6 +292,14 @@ export default function Home() {
         <main className="flex-1 flex flex-col overflow-hidden">
           {activeTab === "build" && (
             <div className="flex-1 overflow-y-auto p-6" ref={canvasRef}>
+              <div className="mb-4 flex justify-center">
+                <button
+                  onClick={handleExample}
+                  className="text-sm text-[var(--crt-amber)] hover:text-[var(--crt-green)] border border-dashed border-[var(--border)] hover:border-[var(--crt-green)] px-4 py-2 transition"
+                >
+                  ⚡ Try Example — Feedback Survey
+                </button>
+              </div>
               <div
                 className={`drop-zone p-4 min-h-[400px] ${dragOver ? "drag-over" : ""} ${fields.length > 0 ? "has-items" : ""}`}
                 onDrop={handleDrop}
@@ -356,7 +388,7 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="max-w-lg mx-auto crt-box p-6 bg-[var(--bg)]">
                 <h2 className="text-xl crt-glow-intense mb-1">{formTitle}</h2>
-                <p className="text-sm text-[var(--text-dim)] mb-6">// form preview — interactive mode</p>
+                <p className="text-sm text-[var(--text-dim)] mb-6">{"//"} form preview — interactive mode</p>
 
                 {fields.length === 0 ? (
                   <p className="text-[var(--text-dim)]">No fields to preview. Add some in [BUILD] mode.</p>
@@ -391,7 +423,7 @@ export default function Home() {
           {activeTab === "json" && (
             <div className="flex-1 overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm text-[var(--crt-amber)] tracking-wider">// JSON SCHEMA</h2>
+                <h2 className="text-sm text-[var(--crt-amber)] tracking-wider">{"//"} JSON SCHEMA</h2>
                 <div className="flex gap-2">
                   <button onClick={copyJson} className="text-[11px] text-[var(--text-dim)] hover:text-[var(--crt-green)] border border-[var(--border)] px-3 py-1 transition">
                     [COPY]
@@ -413,7 +445,7 @@ export default function Home() {
           <aside className="w-64 border-l border-[var(--border)] bg-[var(--bg-panel)] p-4 overflow-y-auto">
             {selectedField ? (
               <>
-                <h2 className="text-sm text-[var(--crt-amber)] mb-4 tracking-wider">// PROPERTIES</h2>
+                <h2 className="text-sm text-[var(--crt-amber)] mb-4 tracking-wider">{"//"} PROPERTIES</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="text-[11px] text-[var(--text-dim)] block mb-1">TYPE</label>
